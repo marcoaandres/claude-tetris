@@ -96,6 +96,7 @@ El juego se compone de tres archivos que cooperan:
 
 Define la estructura visual:
 
+- Un título `TETRIS` (`<h1 class="game-title">`) centrado sobre el tablero y el panel, con cada letra coloreada con los colores de las piezas. También es el `<title>` de la pestaña.
 - Un `<canvas id="board">` de **300 × 600** píxeles donde se renderiza el tablero.
 - Un panel lateral con `SCORE`, `LINES`, `LEVEL`, vista de la siguiente pieza y la lista de controles.
 - Un overlay para los estados **PAUSA** y **GAME OVER**.
