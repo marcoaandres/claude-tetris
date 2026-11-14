@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,6 +7,10 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <button id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Modo claro">
+    <span aria-hidden="true">🌙</span><span class="track" aria-hidden="true"></span><span aria-hidden="true">☀️</span>
+  </button>
+
   <div class="wrapper">
     <h1 class="game-title" aria-label="Tetris">
       <span style="color:#ba68c8">T</span><span style="color:#ffd54f">E</span><span style="color:#4dd0e1">T</span><span style="color:#e57373">R</span><span style="color:#81c784">I</span><span style="color:#ffb74d">S</span>
