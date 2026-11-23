@@ -41,7 +41,7 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 
 let gridColor = '#22222e';
-let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let board, current, next, score, lines, level, startLevel, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -107,10 +107,14 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = Math.max(startLevel, Math.floor(lines / 10) + 1);
+    dropInterval = dropIntervalFor(level);
     updateHUD();
   }
+}
+
+function dropIntervalFor(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
 }
 
 function ghostY() {
@@ -230,14 +234,15 @@ function endGame() {
 function togglePause() {
   if (gameOver) return;
   paused = !paused;
+  cancelAnimationFrame(animId);
   if (!paused) {
+    closePauseMenu(); // pause.js
+    // dt = 0 en el primer frame: sin caída por el tiempo en pausa. dropAccum se
+    // conserva para que pausar/reanudar en bucle no congele la gravedad.
     lastTime = performance.now();
     loop(lastTime);
   } else {
-    cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    openPauseMenu(); // pause.js
   }
 }
 
@@ -257,26 +262,30 @@ function loop(ts) {
   animId = requestAnimationFrame(loop);
 }
 
-function init() {
+// lvl: nivel inicial (1–10); si no es válido se usa el elegido en el menú de pausa
+function init(lvl) {
+  startLevel = resolveStartLevel(lvl); // pause.js
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = dropIntervalFor(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  closePauseMenu(); // pause.js
+  restartBtn.blur(); // evita que Enter vuelva a reiniciar durante la partida
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  if (e.code === 'KeyP' || e.code === 'Escape') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':

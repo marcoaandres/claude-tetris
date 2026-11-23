@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>TETRIS</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="pause.css" />
 </head>
 <body>
   <button id="theme-toggle" class="theme-toggle" role="switch" aria-checked="false" aria-label="Modo claro">
@@ -46,7 +47,7 @@
             <li><kbd>↑</kbd> rotar</li>
             <li><kbd>↓</kbd> bajar</li>
             <li><kbd>Space</kbd> caída</li>
-            <li><kbd>P</kbd> pausa</li>
+            <li><kbd>P</kbd><kbd>Esc</kbd> pausa</li>
           </ul>
         </div>
       </aside>
@@ -59,9 +60,39 @@
         <button id="restart-btn">Reiniciar</button>
       </div>
     </div>
+
+    <div id="pause-menu" class="overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+      <div class="pause-box">
+        <p id="pause-title" class="pause-title">PAUSA</p>
+        <button type="button" class="pause-item" data-action="resume">Reanudar</button>
+        <button type="button" class="pause-item" data-action="restart">Reiniciar</button>
+        <button type="button" class="pause-item" data-action="controls" aria-expanded="false" aria-controls="pause-controls">Ver controles</button>
+        <div id="pause-controls" class="pause-controls" hidden>
+          <ul>
+            <li><span><kbd>←</kbd><kbd>→</kbd></span> mover</li>
+            <li><span><kbd>↑</kbd><kbd>X</kbd></span> rotar</li>
+            <li><span><kbd>↓</kbd></span> bajar</li>
+            <li><span><kbd>Space</kbd></span> caída</li>
+            <li><span><kbd>P</kbd><kbd>Esc</kbd></span> pausa / reanudar</li>
+          </ul>
+          <p class="pause-controls-note">En este menú: <kbd>↑</kbd><kbd>↓</kbd> navegar, <kbd>Enter</kbd> elegir, <kbd>←</kbd><kbd>→</kbd> nivel</p>
+        </div>
+        <div class="pause-item pause-level" data-action="level" tabindex="0" role="spinbutton"
+             aria-label="Nivel inicial" aria-valuemin="1" aria-valuemax="10" aria-valuenow="1">
+          <span>Nivel inicial</span>
+          <span class="pause-level-picker">
+            <button type="button" class="pause-level-btn" data-step="-1" tabindex="-1" aria-label="Bajar nivel inicial">‹</button>
+            <span id="pause-level-value" class="pause-level-value">1</span>
+            <button type="button" class="pause-level-btn" data-step="1" tabindex="-1" aria-label="Subir nivel inicial">›</button>
+          </span>
+        </div>
+        <p class="pause-hint">El nivel inicial se aplica al reiniciar</p>
+      </div>
+    </div>
     </div>
   </div>
 
+  <script src="pause.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
