@@ -4,17 +4,6 @@ const COLS = 10;
 const ROWS = 20;
 const BLOCK = 30;
 
-const COLORS = [
-  null,
-  '#4dd0e1', // I - cyan
-  '#ffd54f', // O - yellow
-  '#ba68c8', // T - purple
-  '#81c784', // S - green
-  '#e57373', // Z - red
-  '#447170', // J - verde azulado
-  '#ffb74d', // L - orange
-];
-
 const PIECES = [
   null,
   [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], // I
@@ -157,20 +146,25 @@ function updateHUD() {
   levelEl.textContent = level;
 }
 
+// Delega el dibujo del bloque en la skin activa (ver skins.js)
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
+  const skin = getSkin();
   context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  skin.drawBlock(context, x * size, y * size, size, skin.colors[colorIndex], alpha);
   context.globalAlpha = 1;
 }
 
+// Pinta el fondo de un canvas; si la skin no define color se usa el del tema (CSS)
+function fillBackground(context, target, color) {
+  context.clearRect(0, 0, target.width, target.height);
+  if (!color) return;
+  context.fillStyle = color;
+  context.fillRect(0, 0, target.width, target.height);
+}
+
 function drawGrid() {
-  ctx.strokeStyle = gridColor;
+  ctx.strokeStyle = getSkin().gridColor || gridColor;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -187,7 +181,7 @@ function drawGrid() {
 }
 
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  fillBackground(ctx, canvas, getSkin().boardBg);
   drawGrid();
 
   // board
@@ -210,7 +204,7 @@ function draw() {
 
 function drawNext() {
   const NB = 30;
-  nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  fillBackground(nextCtx, nextCanvas, getSkin().nextBg);
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
@@ -318,6 +312,43 @@ themeToggle.addEventListener('click', () => {
   setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light');
   themeToggle.blur(); // evita que Space active el botón
 });
+
+// ---- Selector de skin ----
+const skinSelect = document.getElementById('skin-select');
+const SKIN_GAME_KEYS = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space', 'KeyX', 'KeyP', 'Escape'];
+
+for (const [id, skin] of Object.entries(SKINS)) {
+  const opt = document.createElement('option');
+  opt.value = id;
+  opt.textContent = skin.name;
+  skinSelect.appendChild(opt);
+}
+
+function applySkin(id) {
+  setSkin(id);
+  skinSelect.value = getSkinId();
+  document.body.dataset.skin = getSkinId();
+  // redibuja al instante (también en pausa o game over, cuando el loop no corre)
+  if (current) { draw(); drawNext(); }
+}
+
+skinSelect.addEventListener('change', () => {
+  applySkin(skinSelect.value);
+  skinSelect.blur(); // las flechas/Espacio vuelven a controlar el juego
+});
+
+// Durante la partida, con el select enfocado, las teclas del juego no cambian
+// la skin (devuelven el control al juego). En pausa o game over el select se
+// puede usar con teclado normalmente.
+skinSelect.addEventListener('keydown', e => {
+  if (!paused && !gameOver && SKIN_GAME_KEYS.includes(e.code)) {
+    e.preventDefault();
+    skinSelect.blur();
+  }
+});
+
+skinSelect.value = getSkinId();
+document.body.dataset.skin = getSkinId();
 
 let savedTheme = null;
 try { savedTheme = localStorage.getItem('theme'); } catch (e) {}
