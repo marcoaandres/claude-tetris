@@ -22,6 +22,7 @@ Implementación del clásico **Tetris** en JavaScript vanilla, usando HTML5 Canv
     - [2. `style.css`](#2-stylecss)
     - [3. `skins.js`](#3-skinsjs)
     - [4. `game.js`](#4-gamejs)
+    - [5. `records.js` y `records.css`](#5-recordsjs-y-recordscss)
     - [Flujo del juego](#flujo-del-juego)
   - [Tecnologías](#tecnologías)
   - [Estructura del proyecto](#estructura-del-proyecto)
@@ -43,6 +44,9 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Sistema de puntuación** clásico de Tetris (100 / 300 / 500 / 800 multiplicado por nivel).
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
 - **Pausa** y **Game Over** con opción de reinicio.
+- **Pantalla de inicio** con botón _Jugar_ (o `Enter`): el juego ya no arranca solo al cargar la página.
+- **Tabla de records local** (top 5) guardada en `localStorage`, con nombre del jugador, puntos, líneas y mejor combo. Se muestra en la pantalla de inicio y en el Game Over, resaltando la puntuación nueva si entra en el top. Incluye un botón para resetear records.
+- **Mejor combo** y **líneas máximas** históricas.
 - **Skins visuales** seleccionables desde el panel (Retro, Neón, Pastel y Pixel art); el cambio se aplica al instante, sin recargar, y la preferencia se guarda en `localStorage` (clave `tetris.skin`).
 
 ---
@@ -87,12 +91,13 @@ Después abre `http://localhost:8000` en el navegador.
 | `↓`       | Soft drop (bajar más rápido)      |
 | `Espacio` | Hard drop (caída instantánea)     |
 | `P`       | Pausar / reanudar                 |
+| `Enter`   | Empezar partida (pantalla de inicio) / guardar nombre del record |
 
 ---
 
 ## Cómo funciona
 
-El juego se compone de cuatro archivos que cooperan:
+El juego se compone de varios archivos que cooperan:
 
 ### 1. `index.html`
 
@@ -101,7 +106,8 @@ Define la estructura visual:
 - Un título `TETRIS` (`<h1 class="game-title">`) centrado sobre el tablero y el panel, con cada letra coloreada con los colores de las piezas. También es el `<title>` de la pestaña.
 - Un `<canvas id="board">` de **300 × 600** píxeles donde se renderiza el tablero.
 - Un panel lateral con `SCORE`, `LINES`, `LEVEL`, vista de la siguiente pieza, selector de skin (`<select id="skin-select">`) y la lista de controles.
-- Un overlay para los estados **PAUSA** y **GAME OVER**.
+- Un overlay para los estados **PAUSA** y **GAME OVER** (en Game Over incluye el campo de nombre y la tabla de records).
+- Un overlay `#start-screen` con el botón **Jugar** y la tabla de records.
 
 ### 2. `style.css`
 
@@ -141,9 +147,29 @@ Contiene toda la lógica del juego. A grandes rasgos:
 - **Nivel y velocidad**: el nivel sube cada 10 líneas; la velocidad de caída se calcula como `max(100, 1000 − (level − 1) × 90)` milisegundos.
 - **Ghost piece** (`ghostY`): proyecta la posición final de la pieza actual hacia abajo y la dibuja con `globalAlpha = 0.2`.
 
+### 5. `records.js` y `records.css`
+
+Tabla de records local. `records.js` se carga **antes** de `game.js` y expone unos ganchos que el juego llama:
+
+| Función                  | Llamada desde    | Qué hace                                                                                                 |
+| ------------------------ | ---------------- | -------------------------------------------------------------------------------------------------------- |
+| `recordsOnGameStart()`   | `init()`         | Reinicia el combo, oculta la pantalla de inicio y guarda un record pendiente con el nombre por defecto. |
+| `recordsTrackClear(n)`   | `clearLines()`   | Lleva el combo: +1 si la pieza fijada eliminó líneas, 0 si no.                                           |
+| `recordsOnGameOver()`    | `endGame()`      | Actualiza estadísticas y, si la puntuación entra en el top 5, pide el nombre.                            |
+| `showStartScreen()`      | arranque         | Muestra la pantalla de inicio con la tabla.                                                              |
+
+Datos en `localStorage` (lecturas y escrituras protegidas con `try/catch`; datos corruptos = lista vacía):
+
+- `tetris.records`: `[{ name, score, lines, maxCombo, date }]`, ordenado por puntuación descendente, máximo 5 entradas.
+- `tetris.stats`: `{ bestCombo, maxLines }`, mejor combo y líneas máximas históricas. Se guardan aparte para que cuenten aunque la partida no entre en el top 5.
+
+El **combo** es el número de piezas fijadas consecutivas que eliminan al menos una línea. El nombre admite hasta 12 caracteres (`Jugador` si se deja vacío) y se pinta con `textContent`, nunca como HTML. Si se pulsa **Reiniciar** sin guardar, el record se guarda con el nombre por defecto. **Resetear records** pide confirmación y borra ambas claves.
+
 ### Flujo del juego
 
 ```
+showStartScreen()  → botón Jugar / Enter
+        ↓
 init()
   ├─ createBoard()                  → matriz vacía
   ├─ next = randomPiece()
@@ -159,7 +185,7 @@ init()
    keydown → mover / rotar / soft-drop / hard-drop / pausa
 ```
 
-Cuando una pieza recién generada ya colisiona al aparecer (`spawn`), se dispara `endGame()` y se muestra el overlay de **Game Over**.
+Cuando una pieza recién generada ya colisiona al aparecer (`spawn`), se dispara `endGame()` y se muestra el overlay de **Game Over** con la tabla de records.
 
 ---
 
@@ -183,6 +209,8 @@ Cuando una pieza recién generada ya colisiona al aparecer (`spawn`), se dispara
 ├── style.css       # Estilos del juego (dark theme)
 ├── skins.js        # Skins visuales (paletas y funciones de dibujo)
 ├── game.js         # Toda la lógica del Tetris (~350 líneas)
+├── records.js      # Tabla de records local (localStorage)
+├── records.css     # Estilos de la tabla de records y pantalla de inicio
 └── README.md
 ```
 

@@ -93,6 +93,7 @@ function clearLines() {
       r++;
     }
   }
+  recordsTrackClear(cleared);
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
@@ -219,6 +220,7 @@ function endGame() {
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
+  recordsOnGameOver();
 }
 
 function togglePause() {
@@ -248,10 +250,11 @@ function loop(ts) {
     }
   }
   draw();
-  animId = requestAnimationFrame(loop);
+  if (!gameOver) animId = requestAnimationFrame(loop); // endGame() ya canceló el frame
 }
 
 function init() {
+  recordsOnGameStart();
   board = createBoard();
   score = 0;
   lines = 0;
@@ -270,6 +273,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (!current) return; // partida aún no iniciada (pantalla de inicio)
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -354,4 +358,4 @@ let savedTheme = null;
 try { savedTheme = localStorage.getItem('theme'); } catch (e) {}
 setTheme(savedTheme === 'light' ? 'light' : 'dark', false);
 
-init();
+showStartScreen();
