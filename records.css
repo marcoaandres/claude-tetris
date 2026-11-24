@@ -1,0 +1,144 @@
+/* ---- Tabla de records ---- */
+.records.hidden,
+.name-form.hidden,
+.new-record-msg.hidden {
+  display: none;
+}
+
+.records {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.records-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 280px;
+  background: var(--board-bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.records-table th {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--label);
+  font-weight: 600;
+  text-align: left;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.records-table td {
+  padding: 4px 8px;
+  text-align: left;
+  color: var(--text);
+}
+
+.records-table .records-num {
+  font-family: 'Courier New', Courier, monospace;
+  text-align: right;
+  color: var(--accent);
+}
+
+.records-table .records-name {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.records-table .records-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 10px 8px;
+}
+
+.records-table tr.records-highlight td {
+  background: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+
+.records-stats {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.records-stats strong {
+  font-family: 'Courier New', Courier, monospace;
+  color: var(--accent);
+}
+
+.records-reset {
+  background: none;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.records-reset:hover {
+  background: var(--danger);
+  color: var(--accent-text);
+}
+
+.new-record-msg {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+
+.name-form {
+  display: flex;
+  gap: 6px;
+}
+
+.name-form input {
+  width: 150px;
+  background: var(--board-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+  user-select: text;
+}
+
+.name-form input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+#play-btn,
+#name-save-btn {
+  background: var(--accent);
+  color: var(--accent-text);
+  border: none;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: background 0.15s;
+}
+
+#play-btn {
+  padding: 12px 40px;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+#name-save-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+#play-btn:hover,
+#name-save-btn:hover {
+  background: var(--accent-hover);
+}
