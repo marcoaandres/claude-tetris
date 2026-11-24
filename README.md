@@ -20,8 +20,9 @@ Implementación del clásico **Tetris** en JavaScript vanilla, usando HTML5 Canv
   - [Cómo funciona](#cómo-funciona)
     - [1. `index.html`](#1-indexhtml)
     - [2. `style.css`](#2-stylecss)
-    - [3. `game.js`](#3-gamejs)
-    - [4. `records.js` y `records.css`](#4-recordsjs-y-recordscss)
+    - [3. `skins.js`](#3-skinsjs)
+    - [4. `game.js`](#4-gamejs)
+    - [5. `records.js` y `records.css`](#5-recordsjs-y-recordscss)
     - [Flujo del juego](#flujo-del-juego)
   - [Tecnologías](#tecnologías)
   - [Estructura del proyecto](#estructura-del-proyecto)
@@ -46,6 +47,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Pantalla de inicio** con botón _Jugar_ (o `Enter`): el juego ya no arranca solo al cargar la página.
 - **Tabla de records local** (top 5) guardada en `localStorage`, con nombre del jugador, puntos, líneas y mejor combo. Se muestra en la pantalla de inicio y en el Game Over, resaltando la puntuación nueva si entra en el top. Incluye un botón para resetear records.
 - **Mejor combo** y **líneas máximas** históricas.
+- **Skins visuales** seleccionables desde el panel (Retro, Neón, Pastel y Pixel art); el cambio se aplica al instante, sin recargar, y la preferencia se guarda en `localStorage` (clave `tetris.skin`).
 
 ---
 
@@ -103,7 +105,7 @@ Define la estructura visual:
 
 - Un título `TETRIS` (`<h1 class="game-title">`) centrado sobre el tablero y el panel, con cada letra coloreada con los colores de las piezas. También es el `<title>` de la pestaña.
 - Un `<canvas id="board">` de **300 × 600** píxeles donde se renderiza el tablero.
-- Un panel lateral con `SCORE`, `LINES`, `LEVEL`, vista de la siguiente pieza y la lista de controles.
+- Un panel lateral con `SCORE`, `LINES`, `LEVEL`, vista de la siguiente pieza, selector de skin (`<select id="skin-select">`) y la lista de controles.
 - Un overlay para los estados **PAUSA** y **GAME OVER** (en Game Over incluye el campo de nombre y la tabla de records).
 - Un overlay `#start-screen` con el botón **Jugar** y la tabla de records.
 
@@ -111,7 +113,27 @@ Define la estructura visual:
 
 Aporta el aspecto visual con estética _dark / retro arcade_: fondo oscuro, tipografía monoespaciada para los marcadores y _backdrop blur_ en los overlays.
 
-### 3. `game.js`
+### 3. `skins.js`
+
+Define el objeto `SKINS` con las cuatro apariencias. Cada skin tiene:
+
+- `name`: etiqueta que se muestra en el selector.
+- `colors`: paleta por tipo de pieza (índice 0 vacío, 1–7 para I, O, T, S, Z, J, L).
+- `boardBg`, `gridColor`, `nextBg`: fondo del tablero, color de la rejilla y fondo de la vista previa (`null` = usar los colores del tema claro/oscuro).
+- `drawBlock(ctx, px, py, size, color, alpha)`: cómo se pinta un bloque.
+
+| Skin      | Estilo                                                                         |
+| --------- | ------------------------------------------------------------------------------ |
+| Retro     | Bloques cuadrados y colores planos (el aspecto original).                      |
+| Neón      | Fondo negro y efecto _glow_ con `shadowBlur` del color de la pieza.            |
+| Pastel    | Colores suaves y bordes redondeados (`roundRect`, con _fallback_ a `arcTo`).   |
+| Pixel art | Bisel y patrón de píxeles claros/oscuros dibujado sobre cada bloque.           |
+
+También expone `getSkin()` (skin activa), `getSkinId()` (su identificador) y `setSkin(id)` (cambia y guarda la preferencia en `localStorage`; por defecto `retro`). Se carga **antes** que `game.js`.
+
+> Retro usa los colores del tema claro/oscuro; Neón, Pastel y Pixel art pintan su propio fondo en el canvas, por lo que el tablero mantiene su aspecto en ambos temas.
+
+### 4. `game.js`
 
 Contiene toda la lógica del juego. A grandes rasgos:
 
@@ -125,7 +147,7 @@ Contiene toda la lógica del juego. A grandes rasgos:
 - **Nivel y velocidad**: el nivel sube cada 10 líneas; la velocidad de caída se calcula como `max(100, 1000 − (level − 1) × 90)` milisegundos.
 - **Ghost piece** (`ghostY`): proyecta la posición final de la pieza actual hacia abajo y la dibuja con `globalAlpha = 0.2`.
 
-### 4. `records.js` y `records.css`
+### 5. `records.js` y `records.css`
 
 Tabla de records local. `records.js` se carga **antes** de `game.js` y expone unos ganchos que el juego llama:
 
@@ -185,7 +207,8 @@ Cuando una pieza recién generada ya colisiona al aparecer (`spawn`), se dispara
 03-tetris/
 ├── index.html      # Estructura del DOM y canvas
 ├── style.css       # Estilos del juego (dark theme)
-├── game.js         # Toda la lógica del Tetris (~300 líneas)
+├── skins.js        # Skins visuales (paletas y funciones de dibujo)
+├── game.js         # Toda la lógica del Tetris (~350 líneas)
 ├── records.js      # Tabla de records local (localStorage)
 ├── records.css     # Estilos de la tabla de records y pantalla de inicio
 └── README.md
@@ -195,16 +218,18 @@ Cuando una pieza recién generada ya colisiona al aparecer (`spawn`), se dispara
 
 ## Personalización
 
-Algunos parámetros fáciles de tunear en `game.js`:
+Algunos parámetros fáciles de tunear en `game.js` y `skins.js`:
 
 | Constante      | Significado                              | Por defecto           |
 | -------------- | ---------------------------------------- | --------------------- |
 | `COLS`         | Columnas del tablero                     | `10`                  |
 | `ROWS`         | Filas del tablero                        | `20`                  |
 | `BLOCK`        | Tamaño en píxeles de cada celda          | `30`                  |
-| `COLORS`       | Paleta de colores por tipo de pieza      | 7 colores             |
+| `SKINS[id].colors` (`skins.js`) | Paleta de colores por tipo de pieza de cada skin | 7 colores por skin |
 | `LINE_SCORES`  | Puntos por 1, 2, 3 o 4 líneas eliminadas | `[0,100,300,500,800]` |
 | `dropInterval` | Velocidad inicial de caída en ms         | `1000`                |
+
+> Para añadir una skin nueva basta con agregar una entrada a `SKINS` en `skins.js`: aparecerá automáticamente en el selector.
 
 > Si cambias `COLS`, `ROWS` o `BLOCK`, recuerda ajustar también `width` y `height` del `<canvas id="board">` en `index.html` para que coincida (`COLS × BLOCK` × `ROWS × BLOCK`).
 
