@@ -1,0 +1,112 @@
+/* ---- Menú de pausa ---- */
+.pause-box {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  width: 240px;
+  text-align: center;
+}
+
+.pause-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+
+.pause-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: var(--board-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+/* Elemento seleccionado (teclado o ratón): mismo estilo que #restart-btn */
+.pause-item:focus {
+  outline: none;
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+.pause-level {
+  justify-content: space-between;
+  cursor: default;
+}
+
+.pause-level-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pause-level-btn {
+  width: 24px;
+  height: 24px;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.pause-level-value {
+  min-width: 24px;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 18px;
+}
+
+.pause-controls {
+  background: var(--board-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.pause-controls ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pause-controls li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pause-controls li > span {
+  display: flex;
+  gap: 4px;
+  min-width: 80px;
+}
+
+.pause-controls-note,
+.pause-hint {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.pause-controls-note {
+  margin-top: 10px;
+  line-height: 1.8;
+}
